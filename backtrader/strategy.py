@@ -24,11 +24,10 @@ from __future__ import (absolute_import, division, print_function,
 import collections
 import copy
 import datetime
-import inspect
 import itertools
 import operator
 
-from .utils.py3 import (filter, keys, integer_types, iteritems, itervalues,
+from .utils.py3 import (filter, keys, integer_types, iteritems,
                         map, MAXINT, string_types, with_metaclass)
 
 import backtrader as bt
@@ -37,7 +36,7 @@ from .lineroot import LineSingle
 from .lineseries import LineSeriesStub
 from .metabase import ItemCollection, findowner
 from .trade import Trade
-from .utils import OrderedDict, AutoOrderedDict, AutoDictList
+from .utils import AutoOrderedDict, AutoDictList
 
 
 class MetaStrategy(StrategyBase.__class__):
@@ -55,9 +54,9 @@ class MetaStrategy(StrategyBase.__class__):
         return super(MetaStrategy, meta).__new__(meta, name, bases, dct)
 
     def __init__(cls, name, bases, dct):
-        '''
+        """
         Class has already been created ... register subclasses
-        '''
+        """
         # Initialize the class
         super(MetaStrategy, cls).__init__(name, bases, dct)
 
@@ -105,9 +104,9 @@ class MetaStrategy(StrategyBase.__class__):
 
 
 class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
-    '''
+    """
     Base class to be subclassed for user defined strategies.
-    '''
+    """
 
     _ltype = LineIterator.StratType
 
@@ -118,7 +117,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     lines = ('datetime',)
 
     def qbuffer(self, savemem=0, replaying=False):
-        '''Enable the memory saving schemes. Possible values for ``savemem``:
+        """Enable the memory saving schemes. Possible values for ``savemem``:
 
           0: No savings. Each lines object keeps in memory all values
 
@@ -131,7 +130,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
           -2: Same as -1 plus activation of memory saving for any indicators
               which has declared *plotinfo.plot* as False (will not be plotted)
-        '''
+        """
         if savemem < 0:
             # Get any attribute which labels itself as Indicator
             for ind in self._lineiterators[self.IndType]:
@@ -215,24 +214,24 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self._minperiod = max(minperiods or [self._minperiod])
 
     def _addwriter(self, writer):
-        '''
+        """
         Unlike the other _addxxx functions this one receives an instance
         because the writer works at cerebro level and is only passed to the
         strategy to simplify the logic
-        '''
+        """
         self.writers.append(writer)
 
     def _addindicator(self, indcls, *indargs, **indkwargs):
         indcls(*indargs, **indkwargs)
 
     def _addanalyzer_slave(self, ancls, *anargs, **ankwargs):
-        '''Like _addanalyzer but meant for observers (or other entities) which
+        """Like _addanalyzer but meant for observers (or other entities) which
         rely on the output of an analyzer for the data. These analyzers have
         not been added by the user and are kept separate from the main
         analyzers
 
         Returns the created analyzer
-        '''
+        """
         analyzer = ancls(*anargs, **ankwargs)
         self._slave_analyzers.append(analyzer)
         return analyzer
@@ -320,8 +319,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def _clk_update(self):
         if self._oldsync:
             clk_len = super(Strategy, self)._clk_update()
-            self.lines.datetime[0] = max(d.datetime[0]
-                                         for d in self.datas if len(d))
+            self.lines.datetime[0] = max(d.datetime[0] for d in self.datas if len(d))
             return clk_len
 
         newdlens = [len(d) for d in self.datas]
@@ -413,7 +411,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self.start()
 
     def start(self):
-        '''Called right before the backtesting is about to be started.'''
+        """Called right before the backtesting is about to be started."""
         pass
 
     def getwriterheaders(self):
@@ -489,7 +487,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self._stage1()
 
     def stop(self):
-        '''Called right before the backtesting is about to be stopped'''
+        """
+        Called right before the backtesting is about to be stopped
+        """
         pass
 
     def set_tradehistory(self, onoff=True):
@@ -619,7 +619,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                   allow=None,
                   tzdata=None, cheat=False,
                   *args, **kwargs):
-        '''
+        """
         **Note**: can be called during ``__init__`` or ``start``
 
         Schedules a timer to invoke either a specified callback or the
@@ -703,7 +703,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
           - The created timer
 
-        '''
+        """
         return self.cerebro._add_timer(
             owner=self, when=when, offset=offset, repeat=repeat,
             weekdays=weekdays, weekcarry=weekcarry,
@@ -713,62 +713,63 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             *args, **kwargs)
 
     def notify_timer(self, timer, when, *args, **kwargs):
-        '''Receives a timer notification where ``timer`` is the timer which was
+        """
+        Receives a timer notification where ``timer`` is the timer which was
         returned by ``add_timer``, and ``when`` is the calling time. ``args``
         and ``kwargs`` are any additional arguments passed to ``add_timer``
 
         The actual ``when`` time can be later, but the system may have not be
         able to call the timer before. This value is the timer value and no the
         system time.
-        '''
+        """
         pass
 
     def notify_cashvalue(self, cash, value):
-        '''
+        """
         Receives the current fund value, value status of the strategy's broker
-        '''
+        """
         pass
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        '''
+        """
         Receives the current cash, value, fundvalue and fund shares
-        '''
+        """
         pass
 
     def notify_order(self, order):
-        '''
+        """
         Receives an order whenever there has been a change in one
-        '''
+        """
         pass
 
     def notify_trade(self, trade):
-        '''
+        """
         Receives a trade whenever there has been a change in one
-        '''
+        """
         pass
 
     def notify_store(self, msg, *args, **kwargs):
-        '''Receives a notification from a store provider'''
+        """Receives a notification from a store provider"""
         pass
 
     def notify_data(self, data, status, *args, **kwargs):
-        '''Receives a notification from data'''
+        """Receives a notification from data"""
         pass
 
     def getdatanames(self):
-        '''
+        """
         Returns a list of the existing data names
-        '''
+        """
         return keys(self.env.datasbyname)
 
     def getdatabyname(self, name):
-        '''
+        """
         Returns a given data by name using the environment (cerebro)
-        '''
+        """
         return self.env.datasbyname[name]
 
     def cancel(self, order):
-        '''Cancels the order in the broker'''
+        """Cancels the order in the broker"""
         self.broker.cancel(order)
 
     def buy(self, data=None,
@@ -777,7 +778,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             trailamount=None, trailpercent=None,
             parent=None, transmit=True,
             **kwargs):
-        '''Create a buy (long) order and send it to the broker
+        """Create a buy (long) order and send it to the broker
 
           - ``data`` (default: ``None``)
 
@@ -922,7 +923,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         Returns:
           - the submitted order
 
-        '''
+        """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
 
@@ -946,13 +947,13 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
              trailamount=None, trailpercent=None,
              parent=None, transmit=True,
              **kwargs):
-        '''
+        """
         To create a selll (short) order and send it to the broker
 
         See the documentation for ``buy`` for an explanation of the parameters
 
         Returns: the submitted order
-        '''
+        """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
 
@@ -971,7 +972,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return None
 
     def close(self, data=None, size=None, **kwargs):
-        '''
+        """
         Counters a long/short position closing it
 
         See the documentation for ``buy`` for an explanation of the parameters
@@ -982,7 +983,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             not provided (default: ``None``) by the caller
 
         Returns: the submitted order
-        '''
+        """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
         elif data is None:
@@ -1004,7 +1005,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                     stopprice=None, stopexec=bt.Order.Stop, stopargs={},
                     limitprice=None, limitexec=bt.Order.Limit, limitargs={},
                     **kwargs):
-        '''
+        """
         Create a bracket order group (low side - buy order - high side). The
         default behavior is as follows:
 
@@ -1133,7 +1134,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
           - If high/low orders have been suppressed the return value will still
             contain 3 orders, but those suppressed will have a value of
             ``None``
-        '''
+        """
 
         kargs = dict(size=size,
                      data=data, price=price, plimit=plimit, exectype=exectype,
@@ -1180,7 +1181,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                      stopprice=None, stopexec=bt.Order.Stop, stopargs={},
                      limitprice=None, limitexec=bt.Order.Limit, limitargs={},
                      **kwargs):
-        '''
+        """
         Create a bracket order group (low side - buy order - high side). The
         default behavior is as follows:
 
@@ -1205,7 +1206,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
           - If high/low orders have been suppressed the return value will still
             contain 3 orders, but those suppressed will have a value of
             ``None``
-        '''
+        """
 
         kargs = dict(size=size,
                      data=data, price=price, plimit=plimit, exectype=exectype,
@@ -1245,7 +1246,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return [o, ostop, olimit]
 
     def order_target_size(self, data=None, target=0, **kwargs):
-        '''
+        """
         Place an order to rebalance a position to have final size of ``target``
 
         The current ``position`` size is taken into account as the start point
@@ -1262,7 +1263,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
           or
 
           - ``None`` if no order has been issued (``target == position.size``)
-        '''
+        """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
         elif data is None:
@@ -1281,7 +1282,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return None  # no execution target == possize
 
     def order_target_value(self, data=None, target=0.0, price=None, **kwargs):
-        '''
+        """
         Place an order to rebalance a position to have final value of
         ``target``
 
@@ -1299,7 +1300,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
           or
 
           - ``None`` if no order has been issued
-        '''
+        """
 
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1328,7 +1329,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return None  # no execution size == possize
 
     def order_target_percent(self, data=None, target=0.0, **kwargs):
-        '''
+        """
         Place an order to rebalance a position to have final value of
         ``target`` percentage of current portfolio ``value``
 
@@ -1364,25 +1365,25 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
           or
 
           - ``None`` if no order has been issued (``target == position.size``)
-        '''
+        """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
         elif data is None:
             data = self.data
 
-        possize = self.getposition(data, self.broker).size
+        # possize = self.getposition(data, self.broker).size
         target *= self.broker.getvalue()
 
         return self.order_target_value(data=data, target=target, **kwargs)
 
     def getposition(self, data=None, broker=None):
-        '''
+        """
         Returns the current position for a given data in a given broker.
 
         If both are None, the main data and the default broker will be used
 
         A property ``position`` is also available
-        '''
+        """
         data = data if data is not None else self.datas[0]
         broker = broker or self.broker
         return broker.getposition(data)
@@ -1390,13 +1391,13 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     position = property(getposition)
 
     def getpositionbyname(self, name=None, broker=None):
-        '''
+        """
         Returns the current position for a given name in a given broker.
 
         If both are None, the main data and the default broker will be used
 
         A property ``positionbyname`` is also available
-        '''
+        """
         data = self.datas[0] if not name else self.getdatabyname(name)
         broker = broker or self.broker
         return broker.getposition(data)
@@ -1404,26 +1405,26 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     positionbyname = property(getpositionbyname)
 
     def getpositions(self, broker=None):
-        '''
+        """
         Returns the current by data positions directly from the broker
 
         If the given ``broker`` is None, the default broker will be used
 
         A property ``positions`` is also available
-        '''
+        """
         broker = broker or self.broker
         return broker.positions
 
     positions = property(getpositions)
 
     def getpositionsbyname(self, broker=None):
-        '''
+        """
         Returns the current by name positions directly from the broker
 
         If the given ``broker`` is None, the default broker will be used
 
         A property ``positionsbyname`` is also available
-        '''
+        """
         broker = broker or self.broker
         positions = broker.positions
 
@@ -1442,29 +1443,29 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self.setsizer(sizer(*args, **kwargs))
 
     def setsizer(self, sizer):
-        '''
+        """
         Replace the default (fixed stake) sizer
-        '''
+        """
         self._sizer = sizer
         sizer.set(self, self.broker)
         return sizer
 
     def getsizer(self):
-        '''
+        """
         Returns the sizer which is in used if automatic statke calculation is
         used
 
         Also available as ``sizer``
-        '''
+        """
         return self._sizer
 
     sizer = property(getsizer, setsizer)
 
     def getsizing(self, data=None, isbuy=True):
-        '''
+        """
         Return the stake calculated by the sizer instance for the current
         situation
-        '''
+        """
         data = data if data is not None else self.datas[0]
         return self._sizer.getsizing(data, isbuy=isbuy)
 
@@ -1522,7 +1523,7 @@ class MetaSigStrategy(Strategy.__class__):
 
 
 class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
-    '''This subclass of ``Strategy`` is meant to to auto-operate using
+    """This subclass of ``Strategy`` is meant to to auto-operate using
     **signals**.
 
     *Signals* are usually indicators and the expected output values:
@@ -1600,7 +1601,7 @@ class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
 
         - A ``data`` instance
 
-    '''
+    """
 
     params = (
         ('signals', []),
